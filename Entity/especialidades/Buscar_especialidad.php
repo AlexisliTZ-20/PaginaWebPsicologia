@@ -15,34 +15,33 @@ if ($authHeader) {
     list($jwt) = sscanf($authHeader, 'Bearer %s');
 
     if ($jwt && validate_jwt($jwt)) {
-        // Parse incoming JSON data
-        $data = json_decode(file_get_contents("php://input"), true);
+        // Parse incoming query parameters
+        $query = isset($_GET['query']) ? $_GET['query'] : '';
 
-        if (!$data) {
+        if ($query === null) {
             http_response_code(400);
-            echo json_encode(["message" => "Datos no proporcionados"]);
-            exit;
-        }
-
-        $id = isset($data['id']) ? intval($data['id']) : null;
-
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(["message" => "ID de psiquiatra no proporcionado"]);
+            echo json_encode(["message" => "Consulta de búsqueda no proporcionada"]);
             exit;
         }
 
         try {
-            $sql = "DELETE FROM psicologos WHERE id = :id";
+            // Sanitize the input
+            $query = '%' . $conn->quote($query, PDO::PARAM_STR) . '%';
+
+            $sql = "SELECT * FROM especialidades 
+                    WHERE especialidad LIKE :query 
+                    OR experiencia LIKE :query 
+                    OR descripcion LIKE :query";
             $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':query', $query);
             $stmt->execute();
+            $especialidades = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             http_response_code(200);
-            echo json_encode(["message" => "Psiquiatra eliminado correctamente"]);
+            echo json_encode($especialidades);
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(["message" => "Error al eliminar psiquiatra", "error" => $e->getMessage()]);
+            echo json_encode(["message" => "Error al buscar especialidades", "error" => $e->getMessage()]);
         }
     } else {
         http_response_code(403);

@@ -1,7 +1,7 @@
 <?php
-include '../../config/bd.php'; // Asegúrate de incluir el archivo correcto para la conexión a tu base de datos
-include '../../config/cors.php'; // Archivo para manejar CORS, si es necesario
-include '../../jwt/jwt_utils.php'; // Funciones para manejar JWT
+include '../../config/bd.php';
+include '../../config/cors.php';
+include '../../jwt/jwt_utils.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -15,62 +15,76 @@ if ($authHeader) {
     list($jwt) = sscanf($authHeader, 'Bearer %s');
 
     if ($jwt && validate_jwt($jwt)) {
-        // Parse incoming JSON data
-        $data = json_decode(file_get_contents("php://input"), true);
+        // Obtener datos del formulario
+        $nombre = filter_var($_POST['nombre'], FILTER_SANITIZE_STRING);
+        $apellido = filter_var($_POST['apellido'], FILTER_SANITIZE_STRING);
+        $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $especialidad_id = filter_var($_POST['especialidad_id'], FILTER_VALIDATE_INT);
+        $telefono = filter_var($_POST['telefono'], FILTER_SANITIZE_STRING);
 
-        if (!$data) {
-            http_response_code(400);
-            echo json_encode(["message" => "Datos no proporcionados"]);
-            exit;
-        }
-
-        // Extract data from JSON
-        $nombre = isset($data['nombre']) ? $data['nombre'] : null;
-        $apellido = isset($data['apellido']) ? $data['apellido'] : null;
-        $email = isset($data['email']) ? $data['email'] : null;
-        $password = isset($data['password']) ? $data['password'] : null;
-        $especialidad_id = isset($data['especialidad_id']) ? $data['especialidad_id'] : null;
-        $telefono = isset($data['telefono']) ? $data['telefono'] : null;
+        if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
+            // Obtener detalles del archivo
+            $fotoTmpPath = $_FILES['foto']['tmp_name'];
+            $fotoName = basename($_FILES['foto']['name']);
+            $fotoType = $_FILES['foto']['type'];
         
-        // Obtener el archivo de la foto
-        $foto = isset($_FILES['foto']) ? $_FILES['foto'] : null;
-        $foto_path = null;
-
-        if (!$nombre || !$apellido || !$email || !$password || !$especialidad_id || !$telefono || !$foto) {
-            http_response_code(400);
-            echo json_encode(["message" => "Datos incompletos"]);
-            exit;
+            // Array de tipos MIME permitidos
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        
+            // Verificar tipo MIME del archivo
+            if (!in_array($fotoType, $allowedMimeTypes)) {
+                echo json_encode(["message" => "Solo se permiten archivos JPEG, PNG y GIF"]);
+                exit();
+            }
+        
+            // Asegúrate de crear la carpeta `../image/psicologo/` si no existe
+            $dest_folder = '../../image/psicologo/';
+            if (!file_exists($dest_folder)) {
+                mkdir($dest_folder, 0755, true); // Crea la carpeta si no existe
+            }
+        
+            $dest_path = "{$dest_folder}{$fotoName}";
+        
+            if (move_uploaded_file($fotoTmpPath, $dest_path)) {
+                // Archivo movido con éxito
+            } else {
+                // Error al mover el archivo
+                echo json_encode(["message" => "Error al subir la foto"]);
+                exit();
+            }
+        } else {
+            $dest_path = null;
         }
 
-        // Hash the password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        // Verificar si el correo electrónico ya existe
+        $sqlCheck = "SELECT COUNT(*) FROM psicologos WHERE email = :email";
+        $stmtCheck = $conn->prepare($sqlCheck);
+        $stmtCheck->bindParam(':email', $email);
+        $stmtCheck->execute();
+        $count = $stmtCheck->fetchColumn();
 
-        try {
-            // Guardar la foto en una ubicación específica (en la carpeta 'image/psicologo')
-            $foto_name = $foto['name'];
-            $foto_tmp_name = $foto['tmp_name'];
-            $foto_path ='' . $foto_name;  // Ruta donde guardar la foto en 'image/psicologo/'
+        if ($count > 0) {
+            echo json_encode(["message" => "El correo electrónico ya está registrado"]);
+            exit();
+        }
 
-            move_uploaded_file($foto_tmp_name, $foto_path);
+        // Consulta SQL para insertar los datos
+        $sql = "INSERT INTO psicologos (nombre, apellido, email, password, especialidad_id, telefono, foto) 
+                VALUES (:nombre, :apellido, :email, :password, :especialidad_id, :telefono, :foto)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->bindParam(':apellido', $apellido);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $password);
+        $stmt->bindParam(':especialidad_id', $especialidad_id);
+        $stmt->bindParam(':telefono', $telefono);
+        $stmt->bindParam(':foto', $dest_path);
 
-            // Insertar en la base de datos
-            $sql = "INSERT INTO psicologos (nombre, apellido, email, password, especialidad_id, telefono, foto) VALUES (:nombre, :apellido, :email, :password, :especialidad_id, :telefono, :foto)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':nombre', $nombre);
-            $stmt->bindParam(':apellido', $apellido);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':password', $hashed_password);
-            $stmt->bindParam(':especialidad_id', $especialidad_id);
-            $stmt->bindParam(':telefono', $telefono);
-            $stmt->bindParam(':foto', $foto_path);  // Guarda la ruta de la foto en la base de datos
-
-            $stmt->execute();
-
-            http_response_code(200);
+        if ($stmt->execute()) {
             echo json_encode(["message" => "Psicólogo registrado correctamente"]);
-        } catch (PDOException $e) {
-            http_response_code(500);
-            echo json_encode(["message" => "Error al registrar psicólogo", "error" => $e->getMessage()]);
+        } else {
+            echo json_encode(["message" => "Error al registrar psicólogo"]);
         }
     } else {
         http_response_code(403);

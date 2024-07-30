@@ -25,7 +25,7 @@ if ($authHeader) {
             // Agregar la URL completa a la foto si es necesario
             foreach ($result as &$row) {
                 if ($row['foto']) {
-                    $row['foto'] = 'http://localhost:8080/login/image/psicologo/' . basename($row['foto']);
+                    $row['foto'] = 'http://localhost/login/image/psicologo/' . basename($row['foto']);
                 }
             }
 

@@ -15,26 +15,49 @@ if ($authHeader) {
     list($jwt) = sscanf($authHeader, 'Bearer %s');
 
     if ($jwt && validate_jwt($jwt)) {
-        parse_str(file_get_contents("php://input"), $put_vars);
+        $id = isset($_POST['id']) ? filter_var($_POST['id'], FILTER_VALIDATE_INT) : null;
+        $texto = isset($_POST['texto']) ? $_POST['texto'] : '';
+        $psicologo_id = isset($_POST['psicologo_id']) ? $_POST['psicologo_id'] : '';
 
-        $id = filter_var($put_vars['id'], FILTER_VALIDATE_INT);
-        $texto = filter_var($put_vars['texto'], FILTER_SANITIZE_STRING);
-        $fecha = filter_var($put_vars['fecha'], FILTER_SANITIZE_STRING);
-        $foto_recomendacion = !empty($put_vars['foto_recomendacion']) ? $put_vars['foto_recomendacion'] : null;
+        if ($id) {
+            // Prepare SQL update statement for text and psicologo_id
+            $sql = "UPDATE recomendaciones SET texto = :texto, psicologo_id = :psicologo_id WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':texto', $texto);
+            $stmt->bindParam(':psicologo_id', $psicologo_id);
 
-        // Opcional: manejar actualización de foto
+            if ($stmt->execute()) {
+                // Handle file upload if present
+                if (isset($_FILES['foto_recomendacion']) && $_FILES['foto_recomendacion']['error'] == UPLOAD_ERR_OK) {
+                    $targetDir = "C:/xampp/htdocs/login/image/recomendaciones/";
+                    $fileName = basename($_FILES['foto_recomendacion']['name']);
+                    $targetFile = $targetDir . $fileName;
 
-        $sql = "UPDATE recomendaciones SET texto = :texto, fecha = :fecha, foto_recomendacion = :foto_recomendacion WHERE id = :id";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':texto', $texto);
-        $stmt->bindParam(':fecha', $fecha);
-        $stmt->bindParam(':foto_recomendacion', $foto_recomendacion);
-        $stmt->bindParam(':id', $id);
+                    // Move the uploaded file to the target directory
+                    if (move_uploaded_file($_FILES['foto_recomendacion']['tmp_name'], $targetFile)) {
+                        // Update the file path in the database
+                        $sqlUpdatePhoto = "UPDATE recomendaciones SET foto_recomendacion = :foto_recomendacion WHERE id = :id";
+                        $stmtPhoto = $conn->prepare($sqlUpdatePhoto);
+                        $stmtPhoto->bindParam(':foto_recomendacion', $fileName);
+                        $stmtPhoto->bindParam(':id', $id);
 
-        if ($stmt->execute()) {
-            echo json_encode(["message" => "Recomendación actualizada correctamente"]);
+                        if ($stmtPhoto->execute()) {
+                            echo json_encode(["message" => "Recomendación actualizada correctamente"]);
+                        } else {
+                            echo json_encode(["message" => "Error al actualizar la foto en la base de datos"]);
+                        }
+                    } else {
+                        echo json_encode(["message" => "Error al mover el archivo"]);
+                    }
+                } else {
+                    echo json_encode(["message" => "Recomendación actualizada correctamente, sin archivo"]);
+                }
+            } else {
+                echo json_encode(["message" => "Error al actualizar la recomendación"]);
+            }
         } else {
-            echo json_encode(["message" => "Error al actualizar recomendación"]);
+            echo json_encode(["message" => "ID de recomendación no proporcionado"]);
         }
     } else {
         http_response_code(403);

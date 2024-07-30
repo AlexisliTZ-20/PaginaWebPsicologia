@@ -8,7 +8,7 @@ $secret_key = "TU_SECRETO";
 function generate_jwt($email, $nombre, $apellido) {
     global $secret_key;
     $issuedAt = time();
-    $expirationTime = $issuedAt + 36000;  // JWT válido por 1 hora
+    $expirationTime = $issuedAt + 36000;  
     $payload = array(
         'email' => $email,
         'nombre' => $nombre,

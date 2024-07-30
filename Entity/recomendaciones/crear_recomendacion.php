@@ -18,7 +18,6 @@ if ($authHeader) {
         // Obtener datos del formulario
         $psicologo_id = filter_var($_POST['psicologo_id'], FILTER_VALIDATE_INT);
         $texto = filter_var($_POST['texto'], FILTER_SANITIZE_STRING);
-        $fecha = filter_var($_POST['fecha'], FILTER_SANITIZE_STRING);
 
         // Manejo de archivo de imagen
         if (isset($_FILES['foto_recomendacion']) && $_FILES['foto_recomendacion']['error'] == UPLOAD_ERR_OK) {
@@ -40,9 +39,7 @@ if ($authHeader) {
 
             $dest_path = "{$dest_folder}{$fotoName}";
 
-            if (move_uploaded_file($fotoTmpPath, $dest_path)) {
-                // Archivo movido con éxito
-            } else {
+            if (!move_uploaded_file($fotoTmpPath, $dest_path)) {
                 echo json_encode(["message" => "Error al subir la foto"]);
                 exit();
             }
@@ -51,12 +48,10 @@ if ($authHeader) {
         }
 
         // Consulta SQL para insertar los datos
-        $sql = "INSERT INTO recomendaciones (psicologo_id, texto, fecha, foto_recomendacion) 
-                VALUES (:psicologo_id, :texto, :fecha, :foto_recomendacion)";
+        $sql = "INSERT INTO recomendaciones (psicologo_id, texto, foto_recomendacion) VALUES (:psicologo_id, :texto, :foto_recomendacion)";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':psicologo_id', $psicologo_id);
         $stmt->bindParam(':texto', $texto);
-        $stmt->bindParam(':fecha', $fecha);
         $stmt->bindParam(':foto_recomendacion', $dest_path);
 
         if ($stmt->execute()) {

@@ -15,18 +15,22 @@ if ($authHeader) {
     list($jwt) = sscanf($authHeader, 'Bearer %s');
 
     if ($jwt && validate_jwt($jwt)) {
-        parse_str(file_get_contents("php://input"), $delete_vars);
+        // Obtener el ID del artículo a eliminar
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-        $id = filter_var($delete_vars['id'], FILTER_VALIDATE_INT);
+        if ($id > 0) {
+            $sql = "DELETE FROM articulos WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':id', $id);
 
-        $sql = "DELETE FROM articulos WHERE id = :id";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':id', $id);
-
-        if ($stmt->execute()) {
-            echo json_encode(["message" => "Artículo eliminado correctamente"]);
+            if ($stmt->execute()) {
+                echo json_encode(["message" => "Artículo eliminado correctamente"]);
+            } else {
+                echo json_encode(["message" => "Error al eliminar artículo"]);
+            }
         } else {
-            echo json_encode(["message" => "Error al eliminar artículo"]);
+            http_response_code(400);
+            echo json_encode(["message" => "ID no válido"]);
         }
     } else {
         http_response_code(403);

@@ -15,10 +15,15 @@ if ($authHeader) {
     list($jwt) = sscanf($authHeader, 'Bearer %s');
 
     if ($jwt && validate_jwt($jwt)) {
-        parse_str(file_get_contents("php://input"), $delete_vars);
+        // Obtener el parámetro 'id' de la URL
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-        $id = filter_var($delete_vars['id'], FILTER_VALIDATE_INT);
+        if ($id === false) {
+            echo json_encode(["message" => "ID inválido"]);
+            exit();
+        }
 
+        // Consulta SQL para eliminar la recomendación
         $sql = "DELETE FROM recomendaciones WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':id', $id);
@@ -26,7 +31,7 @@ if ($authHeader) {
         if ($stmt->execute()) {
             echo json_encode(["message" => "Recomendación eliminada correctamente"]);
         } else {
-            echo json_encode(["message" => "Error al eliminar recomendación"]);
+            echo json_encode(["message" => "Error al eliminar la recomendación"]);
         }
     } else {
         http_response_code(403);
@@ -36,3 +41,4 @@ if ($authHeader) {
     http_response_code(401);
     echo json_encode(["message" => "Token no proporcionado"]);
 }
+

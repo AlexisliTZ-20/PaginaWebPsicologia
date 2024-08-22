@@ -60,26 +60,24 @@ if ($authHeader) {
         // Verifica si se han proporcionado los datos necesarios
         $nombre = isset($data['nombre']) ? $data['nombre'] : null;
         $apellido = isset($data['apellido']) ? $data['apellido'] : null;
-        $especialidad_id = isset($data['especialidad_id']) ? $data['especialidad_id'] : null;
         $telefono = isset($data['telefono']) ? $data['telefono'] : null;
+        $N_colegiatura = isset($data['N_colegiatura']) ? $data['N_colegiatura'] : null;
         $email = isset($data['email']) ? $data['email'] : null;
         $password = isset($data['password']) ? $data['password'] : null;
 
-
         try {
             // Consulta SQL de actualización
-            $sql = "UPDATE psicologos SET nombre = :nombre, apellido = :apellido, email = :email, especialidad_id  = :especialidad_id , Telefono = :telefono" . ($fotoPath ? ", foto = :foto" : "") . ($password ? ", password = :password" : "") . " WHERE id = :id";
+            $sql = "UPDATE psicologos SET nombre = :nombre, apellido = :apellido, email = :email, telefono = :telefono, N_colegiatura = :N_colegiatura" . ($fotoPath ? ", foto = :foto" : "") . ($password ? ", password = :password" : "") . " WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':nombre', $nombre);
             $stmt->bindParam(':apellido', $apellido);
             $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':especialidad_id', $especialidad_id);
             $stmt->bindParam(':telefono', $telefono);
+            $stmt->bindParam(':N_colegiatura', $N_colegiatura);
             if ($fotoPath) {
                 $stmt->bindParam(':foto', $fotoPath);
             }
             if ($password) {
-
                 $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
                 $stmt->bindParam(':password', $hash);
             }

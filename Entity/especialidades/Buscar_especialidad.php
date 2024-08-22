@@ -28,10 +28,16 @@ if ($authHeader) {
             // Sanitize the input
             $query = '%' . $conn->quote($query, PDO::PARAM_STR) . '%';
 
-            $sql = "SELECT * FROM especialidades 
-                    WHERE especialidad LIKE :query 
-                    OR experiencia LIKE :query 
-                    OR descripcion LIKE :query";
+            // SQL query with JOIN to include psicólogos information
+            $sql = "SELECT e.*, p.nombre AS psicologo_nombre, p.apellido AS psicologo_apellido 
+                    FROM especialidades e
+                    JOIN psicologos p ON e.psicologo_id = p.id
+                    WHERE e.especialidad LIKE :query 
+                    OR e.experiencia LIKE :query 
+                    OR e.descripcion LIKE :query
+                    OR p.nombre LIKE :query
+                    OR p.apellido LIKE :query";
+                    
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':query', $query);
             $stmt->execute();

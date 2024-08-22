@@ -18,11 +18,22 @@ if ($authHeader) {
         $psicologo_id = isset($_GET['psicologo_id']) ? filter_var($_GET['psicologo_id'], FILTER_VALIDATE_INT) : null;
 
         if ($psicologo_id) {
-            $sql = "SELECT * FROM horarios WHERE psicologo_id = :psicologo_id";
+            // Query to get horarios and associated psicologo details
+            $sql = "
+                SELECT horarios.*, psicologos.nombre AS psicologo_nombre, psicologos.apellido AS psicologo_apellido
+                FROM horarios
+                JOIN psicologos ON horarios.psicologo_id = psicologos.id
+                WHERE horarios.psicologo_id = :psicologo_id
+            ";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':psicologo_id', $psicologo_id);
         } else {
-            $sql = "SELECT * FROM horarios";
+            // Query to get all horarios and associated psicologo details
+            $sql = "
+                SELECT horarios.*, psicologos.nombre AS psicologo_nombre, psicologos.apellido AS psicologo_apellido
+                FROM horarios
+                JOIN psicologos ON horarios.psicologo_id = psicologos.id
+            ";
             $stmt = $conn->prepare($sql);
         }
 

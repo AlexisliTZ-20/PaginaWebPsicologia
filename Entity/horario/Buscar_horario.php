@@ -18,8 +18,17 @@ if ($authHeader) {
         // Obtener el parámetro de consulta de búsqueda
         $query = isset($_GET['q']) ? filter_var($_GET['q'], FILTER_SANITIZE_STRING) : '';
 
-        // Consulta SQL para buscar horarios
-        $sql = "SELECT * FROM horarios WHERE dia_semana LIKE :query OR hora_inicio LIKE :query OR hora_fin LIKE :query";
+        // Consulta SQL para buscar horarios y psicólogos
+        $sql = "
+            SELECT horarios.*, psicologos.nombre AS psicologo_nombre, psicologos.apellido AS psicologo_apellido
+            FROM horarios
+            JOIN psicologos ON horarios.psicologo_id = psicologos.id
+            WHERE horarios.dia_semana LIKE :query 
+               OR horarios.hora_inicio LIKE :query 
+               OR horarios.hora_fin LIKE :query
+               OR psicologos.nombre LIKE :query
+               OR psicologos.apellido LIKE :query
+        ";
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':query', "%$query%");
         $stmt->execute();
@@ -35,3 +44,4 @@ if ($authHeader) {
     http_response_code(401);
     echo json_encode(["message" => "Token no proporcionado"]);
 }
+

@@ -20,8 +20,8 @@ if ($authHeader) {
         $apellido = filter_var($_POST['apellido'], FILTER_SANITIZE_STRING);
         $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
         $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-        $especialidad_id = filter_var($_POST['especialidad_id'], FILTER_VALIDATE_INT);
         $telefono = filter_var($_POST['telefono'], FILTER_SANITIZE_STRING);
+        $N_colegiatura = filter_var($_POST['N_colegiatura'], FILTER_SANITIZE_STRING);
 
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
             // Obtener detalles del archivo
@@ -70,15 +70,15 @@ if ($authHeader) {
         }
 
         // Consulta SQL para insertar los datos
-        $sql = "INSERT INTO psicologos (nombre, apellido, email, password, especialidad_id, telefono, foto) 
-                VALUES (:nombre, :apellido, :email, :password, :especialidad_id, :telefono, :foto)";
+        $sql = "INSERT INTO psicologos (nombre, apellido, email, password, telefono, foto,N_colegiatura) 
+                VALUES (:nombre, :apellido, :email, :password, :telefono, :foto, :N_colegiatura)";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':nombre', $nombre);
         $stmt->bindParam(':apellido', $apellido);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $password);
-        $stmt->bindParam(':especialidad_id', $especialidad_id);
         $stmt->bindParam(':telefono', $telefono);
+        $stmt->bindParam(':N_colegiatura', $N_colegiatura);
         $stmt->bindParam(':foto', $dest_path);
 
         if ($stmt->execute()) {

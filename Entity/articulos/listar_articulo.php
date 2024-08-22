@@ -15,8 +15,10 @@ if ($authHeader) {
     list($jwt) = sscanf($authHeader, 'Bearer %s');
 
     if ($jwt && validate_jwt($jwt)) {
-        // Consulta SQL para seleccionar todos los artículos
-        $sql = "SELECT * FROM articulos";
+        // Consulta SQL para seleccionar todos los artículos junto con el nombre y apellido del psicólogo
+        $sql = "SELECT a.*, p.nombre AS psicologo_nombre, p.apellido AS psicologo_apellido
+                FROM articulos a
+                JOIN psicologos p ON a.psicologo_id = p.id";
         $stmt = $conn->prepare($sql);
 
         if ($stmt->execute()) {
@@ -34,6 +36,9 @@ if ($authHeader) {
                     if (!empty($article['foto_articulo'])) {
                         $article['foto_articulo'] = $baseUrl . $article['foto_articulo'];
                     }
+                    // Asegurarse de que los campos del psicólogo estén presentes
+                    $article['psicologo_nombre'] = $article['psicologo_nombre'] ?? null;
+                    $article['psicologo_apellido'] = $article['psicologo_apellido'] ?? null;
                 }
 
                 // Hay registros

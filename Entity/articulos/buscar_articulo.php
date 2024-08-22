@@ -15,14 +15,17 @@ if ($authHeader) {
     list($jwt) = sscanf($authHeader, 'Bearer %s');
 
     if ($jwt && validate_jwt($jwt)) {
+        // Get search parameters
         $searchText = isset($_GET['search']) ? filter_var($_GET['search'], FILTER_SANITIZE_STRING) : '';
 
-        // Consulta SQL para buscar artículos con el nombre del psicólogo
+        // Consulta SQL para buscar artículos y psicólogos
         $sql = "
             SELECT a.*, p.nombre AS psicologo_nombre, p.apellido AS psicologo_apellido
             FROM articulos a
             JOIN psicologos p ON a.psicologo_id = p.id
-            WHERE a.titulo LIKE :searchText OR a.contenido LIKE :searchText
+            WHERE (a.titulo LIKE :searchText 
+                OR a.contenido LIKE :searchText 
+                OR CONCAT(p.nombre, ' ', p.apellido) LIKE :searchText)
         ";
         $stmt = $conn->prepare($sql);
         $searchText = "%$searchText%";
@@ -43,6 +46,8 @@ if ($authHeader) {
                     if (!empty($article['foto_articulo'])) {
                         $article['foto_articulo'] = $baseUrl . $article['foto_articulo'];
                     }
+                    // Agregar la fecha de creación
+                    $article['fecha_creacion'] = $article['fecha_creacion'] ?? 'Fecha no disponible'; // Ajusta si el campo tiene otro nombre
                 }
 
                 // Hay registros

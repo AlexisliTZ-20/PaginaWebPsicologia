@@ -17,7 +17,7 @@ if ($authHeader) {
     if ($jwt && validate_jwt($jwt)) {
         try {
             // Consulta SQL para seleccionar los datos, incluyendo la foto
-            $sql = "SELECT id, nombre, apellido, especialidad_id, telefono, email, foto FROM psicologos";
+            $sql = "SELECT id, nombre, apellido, telefono, email, foto,N_colegiatura FROM psicologos";
             $stmt = $conn->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);

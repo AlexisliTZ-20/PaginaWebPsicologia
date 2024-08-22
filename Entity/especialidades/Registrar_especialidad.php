@@ -23,20 +23,21 @@ if ($authHeader) {
             echo json_encode(["message" => "Datos no proporcionados"]);
             exit;
         }
-
+        $psicologo_id = isset($data['psicologo_id']) ? $data['psicologo_id'] : null;
         $especialidad = isset($data['especialidad']) ? $data['especialidad'] : null;
         $experiencia = isset($data['experiencia']) ? $data['experiencia'] : null;
         $descripcion = isset($data['descripcion']) ? $data['descripcion'] : null;
 
-        if (!$especialidad || !$experiencia || !$descripcion) {
+        if (!$especialidad || !$experiencia || !$descripcion|| !$psicologo_id) {
             http_response_code(400);
             echo json_encode(["message" => "Datos incompletos"]);
             exit;
         }
 
         try {
-            $sql = "INSERT INTO especialidades (especialidad, experiencia, descripcion) VALUES (:especialidad, :experiencia, :descripcion)";
+            $sql = "INSERT INTO especialidades (psicologo_id, especialidad, experiencia, descripcion) VALUES (:psicologo_id, :especialidad, :experiencia, :descripcion)";
             $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':psicologo_id', $psicologo_id);
             $stmt->bindParam(':especialidad', $especialidad);
             $stmt->bindParam(':experiencia', $experiencia);
             $stmt->bindParam(':descripcion', $descripcion);

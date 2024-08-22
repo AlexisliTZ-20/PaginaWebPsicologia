@@ -28,20 +28,22 @@ if ($authHeader) {
         $especialidad = isset($data['especialidad']) ? $data['especialidad'] : null;
         $experiencia = isset($data['experiencia']) ? $data['experiencia'] : null;
         $descripcion = isset($data['descripcion']) ? $data['descripcion'] : null;
+        $psicologo_id = isset($data['psicologo_id']) ? intval($data['psicologo_id']) : null;
 
-        if (!$id || !$especialidad || !$experiencia || !$descripcion) {
+        if (!$id || !$especialidad || !$experiencia || !$descripcion || !$psicologo_id) {
             http_response_code(400);
             echo json_encode(["message" => "Datos incompletos"]);
             exit;
         }
 
         try {
-            $sql = "UPDATE especialidades SET especialidad = :especialidad, experiencia = :experiencia, descripcion = :descripcion WHERE id = :id";
+            $sql = "UPDATE especialidades SET especialidad = :especialidad, experiencia = :experiencia, descripcion = :descripcion, psicologo_id = :psicologo_id WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->bindParam(':especialidad', $especialidad);
             $stmt->bindParam(':experiencia', $experiencia);
             $stmt->bindParam(':descripcion', $descripcion);
+            $stmt->bindParam(':psicologo_id', $psicologo_id);
             $stmt->execute();
 
             http_response_code(200);
@@ -58,3 +60,4 @@ if ($authHeader) {
     http_response_code(401);
     echo json_encode(["message" => "Token no proporcionado"]);
 }
+

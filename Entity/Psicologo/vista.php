@@ -1,6 +1,7 @@
 <?php
 include '../../config/bd.php';
 include '../../config/cors.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -33,7 +34,7 @@ try {
         echo json_encode(["message" => "No se encontraron psicólogos"]);
     } else {
         // Add the full URL for the photo if available
-        $baseUrl = 'http://localhost/login/image/psicologo/'; // Adjust based on your environment
+        $baseUrl = url('/image/psicologos/'); // Change this URL based on your configuration
 
         foreach ($psicologos as &$psicologo) {
             if (!empty($psicologo['psicologo_foto'])) {

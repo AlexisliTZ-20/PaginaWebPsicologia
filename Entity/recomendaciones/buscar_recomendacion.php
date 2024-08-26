@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -19,7 +20,7 @@ if ($authHeader) {
         $id = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : null;
         $searchText = isset($_GET['search']) ? filter_var($_GET['search'], FILTER_SANITIZE_STRING) : null;
 
-        $baseImageUrl = 'http://localhost/login/image/recomendaciones/'; // Base URL para las imágenes
+        $baseImageUrl = url('/image/recomendaciones/');
 
         if ($id) {
             // Obtener recomendación específica por ID

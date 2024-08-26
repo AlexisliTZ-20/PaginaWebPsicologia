@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -30,7 +31,7 @@ if ($authHeader) {
                 echo json_encode(["message" => "No se encontraron artículos"]);
             } else {
                 // Agregar la URL completa para la foto
-                $baseUrl = 'http://localhost/login/image/articulos/'; // Cambia esta URL según tu configuración
+                $baseUrl = url('/image/articulos/'); // Cambia esta URL según tu configuración
 
                 foreach ($articles as &$article) {
                     if (!empty($article['foto_articulo'])) {

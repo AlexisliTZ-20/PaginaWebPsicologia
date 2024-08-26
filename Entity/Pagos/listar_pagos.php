@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -37,7 +38,7 @@ if ($authHeader) {
                 $pagos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 // Definir la URL base de la imagen
-                $baseUrl = 'http://localhost/login/image/pagos/';
+                $baseUrl = url('/image/pagos/');
 
                 // Añadir la URL completa de la foto de pago a cada registro
                 foreach ($pagos as &$pago) {

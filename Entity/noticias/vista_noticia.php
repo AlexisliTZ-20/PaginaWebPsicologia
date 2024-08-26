@@ -1,6 +1,7 @@
 <?php
 include '../../config/bd.php';
 include '../../config/cors.php';
+require_once '../../utils/url.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -28,7 +29,7 @@ if ($stmt->execute()) {
         echo json_encode(["message" => "No se encontraron noticias"]);
     } else {
         // Agregar la URL completa para la foto
-        $baseUrl = 'http://localhost/login/image/noticias/'; // Cambia esta URL según tu configuración
+        $baseUrl = url('/image/noticias/');
 
         foreach ($noticias as &$noticia) {
             if (!empty($noticia['foto_noticia'])) {

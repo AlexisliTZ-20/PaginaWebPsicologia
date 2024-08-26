@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -26,8 +27,7 @@ if ($authHeader) {
 
 
             if ($recommendation && isset($recommendation['foto_recomendacion'])) {
-
-                $recommendation['foto_recomendacion'] = 'http://localhost/login/image/recomendaciones/' . basename($recommendation['foto_recomendacion']);
+                $recommendation['foto_recomendacion'] = url('/image/recomendaciones/') . basename($recommendation['foto_recomendacion']);
             }
 
             if ($recommendation) {
@@ -46,7 +46,7 @@ if ($authHeader) {
             foreach ($recommendations as &$rec) {
                 if (isset($rec['foto_recomendacion'])) {
                     // Replace with your server URL or IP address
-                    $rec['foto_recomendacion'] = 'http://localhost/login/image/recomendaciones/' . basename($rec['foto_recomendacion']);
+                    $rec['foto_recomendacion'] = url('/image/recomendaciones/') . basename($rec['foto_recomendacion']);
                 }
             }
 

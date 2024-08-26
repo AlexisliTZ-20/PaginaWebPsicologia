@@ -1,6 +1,7 @@
 <?php
 include '../../config/bd.php';
 include '../../config/cors.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -30,7 +31,7 @@ if ($stmt->execute()) {
         echo json_encode(["message" => "No se encontraron recomendaciones"]);
     } else {
         // Agregar la URL completa para la foto
-        $baseUrl = 'http://localhost/login/image/recomendaciones/'; // Cambia esta URL según tu configuración
+        $baseUrl = url('/image/recomendaciones/');
 
         foreach ($recomendaciones as &$recomendacion) {
             if (!empty($recomendacion['foto_recomendacion'])) {

@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -25,7 +26,7 @@ if ($authHeader) {
             // Agregar la URL completa a la foto si es necesario
             foreach ($result as &$row) {
                 if ($row['foto']) {
-                    $row['foto'] = 'http://localhost/login/image/psicologo/' . basename($row['foto']);
+                    $row['foto'] = url('/image/psicologo/') . basename($row['foto']);
                 }
             }
 

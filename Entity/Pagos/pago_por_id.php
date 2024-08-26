@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -40,7 +41,7 @@ if ($authHeader) {
 
                     if ($pago) {
                         // Definir la URL base de la imagen
-                        $baseUrl = 'http://localhost/login/image/pagos/';
+                        $baseUrl = url('/image/pagos/');
                         $pago['foto_pago'] = $pago['foto_pago'] ? $baseUrl . $pago['foto_pago'] : null;
 
                         http_response_code(200); // OK

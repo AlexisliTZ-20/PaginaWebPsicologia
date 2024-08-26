@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -30,7 +31,7 @@ if ($authHeader) {
                 echo json_encode(["message" => "No se encontraron noticias"]);
             } else {
                 // Add the full URL for the news photo
-                $baseUrl = 'http://localhost/login/image/noticias/'; // Change this URL based on your configuration
+                $baseUrl = url('/image/noticias/'); // Change this URL based on your configuration
 
                 foreach ($news as &$newsItem) {
                     if (!empty($newsItem['foto_noticia'])) {

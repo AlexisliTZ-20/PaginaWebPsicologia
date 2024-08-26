@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Establecer los encabezados de la respuesta
 header('Content-Type: application/json');
@@ -51,7 +52,7 @@ if ($authHeader) {
 
         if ($stmt->execute()) {
             if ($foto_noticia) {
-                $targetDir = "C:/xampp/htdocs/login/image/noticias/";
+                $targetDir = url('/image/noticias/');
                 $targetFile = $targetDir . basename($foto_noticia);
 
                 // Mover el archivo subido al directorio de destino

@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -30,7 +31,8 @@ if ($authHeader) {
             if ($stmt->execute()) {
                 // Handle file upload if present
                 if (isset($_FILES['foto_recomendacion']) && $_FILES['foto_recomendacion']['error'] == UPLOAD_ERR_OK) {
-                    $targetDir = "C:/xampp/htdocs/login/image/recomendaciones/";
+
+                    $targetDir = url('/image/recomendaciones/');
                     $fileName = basename($_FILES['foto_recomendacion']['name']);
                     $targetFile = $targetDir . $fileName;
 

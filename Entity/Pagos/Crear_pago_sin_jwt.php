@@ -38,13 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate data
     if ($cita_id && $monto !== null && $tipo_pago_id) {
         $sql = "INSERT INTO pagos (cita_id, monto, fecha_pago, foto_pago, tipoPagoId)
-                VALUES (:cita_id, :monto, CURDATE(), :foto_pago, :psicologo_cuenta_id)";
+                VALUES (:cita_id, :monto, :fecha_pago, :foto_pago, :psicologo_cuenta_id)";
         $stmt = $conn->prepare($sql);
 
         $stmt->bindParam(':cita_id', $cita_id, PDO::PARAM_INT);
         $stmt->bindParam(':monto', $monto, PDO::PARAM_STR);
         $stmt->bindParam(':foto_pago', $foto_pago, PDO::PARAM_STR); // The file name
         $stmt->bindParam(':psicologo_cuenta_id', $tipo_pago_id, PDO::PARAM_INT);
+        $stmt->bindValue(':fecha_pago', date('Y-m-d'));
 
         if ($stmt->execute()) {
             http_response_code(201); // Created

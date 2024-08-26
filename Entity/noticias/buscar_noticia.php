@@ -2,6 +2,7 @@
 include '../../config/bd.php';
 include '../../config/cors.php';
 include '../../jwt/jwt_utils.php';
+require_once '../../utils/url.php';
 
 // Set response headers
 header('Content-Type: application/json');
@@ -21,7 +22,7 @@ if ($authHeader) {
         $startDate = isset($_GET['start_date']) ? filter_var($_GET['start_date'], FILTER_SANITIZE_STRING) : null;
         $endDate = isset($_GET['end_date']) ? filter_var($_GET['end_date'], FILTER_SANITIZE_STRING) : null;
 
-        $baseImageUrl = 'http://localhost/login/image/noticias/'; // Base URL para las imágenes
+        $baseImageUrl = url('/image/noticias/');
 
         $params = [];
         $sql = "SELECT n.id, n.titulo, n.contenido, n.foto_noticia, n.psicologo_id, p.nombre, p.apellido,n.fecha
